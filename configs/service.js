@@ -1,22 +1,25 @@
 import axios from "axios";
 
-const YOUTUBE_BASE_URL = 'https://www.googleapis.com/youtube/v3'
+/**
+ * Search YouTube videos via our server-side API route (no API key needed)
+ */
+const getVideos = async (query) => {
+  try {
+    const resp = await axios.get('/api/youtube-search', {
+      params: { query }
+    });
+    // Map to the same format the app expects: resp[0]?.id?.videoId
+    const items = resp.data?.items || [];
+    // Map to format: [{ id: { videoId: '...' } }]
+    return items.map(item => ({
+      id: { videoId: item.id }
+    }));
+  } catch (error) {
+    console.error('Video search failed:', error.message);
+    return [];
+  }
+};
 
-const getVideos = async(query) => {
-    const params = {
-        part:'snippet',
-        q:query,
-        maxResults:2,
-        type:'video',
-        key: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY
-    }
-
-    const resp = await axios.get(YOUTUBE_BASE_URL+'/search', {params})
-    console.log(resp);
-    
-    return resp.data.items;
-}
-
-export default{
-    getVideos
-}
+export default {
+  getVideos
+};

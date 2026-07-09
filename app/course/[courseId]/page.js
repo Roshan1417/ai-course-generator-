@@ -10,15 +10,15 @@ import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 
 function Course({params}) {
+    const { courseId } = React.use(params);
     const [course,setCourse]=useState();
     useEffect(()=>{
-        params&&GetCourse();
-    },[params])
+        courseId && GetCourse();
+    },[courseId])
 
     const GetCourse=async()=>{
         const result=await db.select().from(CourseList)
-        .where(eq(CourseList?.courseId,params?.courseId))
-
+        .where(eq(CourseList?.courseId, courseId))
         setCourse(result[0]);
         console.log(result);
     }

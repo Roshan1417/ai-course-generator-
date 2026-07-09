@@ -6,7 +6,6 @@ import SelectCategory from "./_components/SelectCategory";
 import TopicDescription from "./_components/TopicDescription";
 import SelectOption from "./_components/SelectOption";
 import { UserInputContext } from "../_context/UserInputContext";
-import { GenerateCourseLayout_AI } from "@/configs/AiModel";
 import LoadingDialog from "./_components/LoadingDialog";
 import { CourseList } from "@/configs/schema";
 import { useUser } from "@clerk/nextjs";
@@ -62,32 +61,55 @@ const CreateCourse = () => {
   const GenerateCourseLayout = async () => {
     setLoading(true)
     const BASIC_PROMPT = 'Generate A Course Tutorial on Following Detail With field as Course Name, Description, Along with Chapter'
-    const USER_INPUT_PROMPT = `Category: ${userCourseInput?.category}, Topic: ${userCourseInput?.topic}, Level:${userCourseInput?.level}, Duration: ${userCourseInput?.duration}, NoOf Chapters:${userCourseInput?.noOfChapters}`
+    const USER_INPUT_PROMPT = ` Name, about, Duration: Category: ${userCourseInput?.category}, Topic: ${userCourseInput?.topic}, Level:${userCourseInput?.level}, Duration: ${userCourseInput?.duration}, NoOf Chapters:${userCourseInput?.noOfChapters}, in JSON format`
     const FINAL_PROMPT = BASIC_PROMPT + USER_INPUT_PROMPT
-    console.log(FINAL_PROMPT);
-    
-    const result = await GenerateCourseLayout_AI.sendMessage(FINAL_PROMPT);
-    console.log(JSON.parse(result.response?.text()))
-    setLoading(false)
-    SaveCourseLayoutInDb(JSON.parse(result.response?.text()))
+
+    try {
+      const resp = await fetch('/api/generate-course', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: FINAL_PROMPT, type: 'course-layout' })
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Generation failed');
+      console.log(data.result);
+      setLoading(false);
+      SaveCourseLayoutInDb(data.result);
+    } catch (e) {
+      setLoading(false);
+      console.error(e);
+      alert('Error generating course: ' + e.message);
+    }
   }
   
   const SaveCourseLayoutInDb = async (courseLayout) => {
     var id = uuidv4();
-    setLoading(true)
+    setLoading(true);
+
+    // Fetch a topic-specific image URL server-side (resolves Unsplash redirect)
+    let bannerUrl = '/placeholder.png';
+    try {
+      const imgResp = await fetch(
+        `/api/course-image?topic=${encodeURIComponent(userCourseInput?.topic || '')}&category=${encodeURIComponent(userCourseInput?.category || '')}`
+      );
+      const imgData = await imgResp.json();
+      if (imgData?.imageUrl) bannerUrl = imgData.imageUrl;
+    } catch (_) {}
+
     const res = await db.insert(CourseList).values({
       courseId: id,
-      name:userCourseInput?.topic,
-      level:userCourseInput?.level,
-      category:userCourseInput?.category,
-      courseOutput:courseLayout,
-      createdBy:user?.primaryEmailAddress?.emailAddress,
-      userName:user?.fullName,
-      userProfileImage:user?.imageUrl
-    })
+      name: userCourseInput?.topic,
+      level: userCourseInput?.level,
+      category: userCourseInput?.category,
+      courseOutput: courseLayout,
+      createdBy: user?.primaryEmailAddress?.emailAddress,
+      userName: user?.fullName,
+      userProfileImage: user?.imageUrl,
+      courseBanner: bannerUrl
+    });
     console.log("Finish");
     setLoading(false);
-    router.replace('/create-course/'+id)
+    router.replace('/create-course/' + id);
   }
   
   return (
@@ -97,7 +119,7 @@ const CreateCourse = () => {
         <h2 className="text-4xl text-primary font-medium">Create Course</h2>
         <div className="flex mt-10">
           {StepperOptions.map((item, index) => (
-            <div className="flex items-center">
+            <div key={item.id} className="flex items-center">
               <div className="flex flex-col items-center w-[10px] md:w-[100px]">
                 <div
                   className={`bg-gray-200 p-3 rounded-full text-white ${

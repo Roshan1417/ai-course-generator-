@@ -10,16 +10,17 @@ import { useRouter } from 'next/navigation';
 import { HiOutlineClipboardDocumentCheck } from "react-icons/hi2";
 
 function FinishScreen({params}) {
+    const { courseId } = React.use(params);
     const { user } = useUser();
     const [course,setCourse]=useState([]);
     const router=useRouter();
     useEffect(() => {
-      params && GetCourse();
-    }, [params,user])
+      courseId && GetCourse();
+    }, [courseId,user])
   
     const GetCourse = async () => {
       const result = await db.select().from(CourseList)
-        .where(and(eq(CourseList.courseId, params?.courseId),
+        .where(and(eq(CourseList.courseId, courseId),
           eq(CourseList?.createdBy, user?.primaryEmailAddress?.emailAddress)))
           setCourse(result[0]);
           console.log(result);

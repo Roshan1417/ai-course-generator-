@@ -27,6 +27,9 @@ const AvailableJobsByLocation = ({ initialJobs = [] }) => {
   };
 
   useEffect(() => {
+    // Skip if no RapidAPI key configured
+    if (!process.env.NEXT_PUBLIC_RAPIDAPI_KEY) return;
+
     const fetchInitialJobs = async () => {
       setLoading(true);
       setError("");
@@ -36,20 +39,16 @@ const AvailableJobsByLocation = ({ initialJobs = [] }) => {
           query: "Software Developer",
         });
         
-        // Remove duplicate jobs based on ID if it exists, or combination of title and company
         const uniqueJobs = data.jobs?.reduce((acc, current) => {
           const isDuplicate = acc.find(job => 
             (job.id && job.id === current.id) || 
             (job.title === current.title && job.company === current.company)
           );
-          if (!isDuplicate) {
-            acc.push(current);
-          }
+          if (!isDuplicate) acc.push(current);
           return acc;
         }, []) || [];
 
         setJobs(prev => {
-          // Combine previous and new jobs, ensuring no duplicates
           const combined = [...prev, ...uniqueJobs];
           return combined.filter((job, index, self) => 
             index === self.findIndex(j => 
@@ -59,7 +58,7 @@ const AvailableJobsByLocation = ({ initialJobs = [] }) => {
           );
         });
       } catch (err) {
-        setError("Failed to fetch jobs. Please try again.");
+        // Fail silently - jobs section is optional
       } finally {
         setLoading(false);
       }

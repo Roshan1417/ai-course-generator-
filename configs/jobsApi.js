@@ -24,7 +24,6 @@ export const fetchJobs = async (params) => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching jobs:", error.message);
     throw new Error("Failed to fetch jobs.");
   }
 };
@@ -43,7 +42,6 @@ export const fetchJobTitles = async (params) => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching job titles:", error.message);
     throw new Error("Failed to fetch job titles.");
   }
 };
@@ -62,7 +60,6 @@ export const fetchSalaryRange = async (params) => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching salary range:", error.message);
     throw new Error("Failed to fetch salary range.");
   }
 };

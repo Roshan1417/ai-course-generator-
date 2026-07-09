@@ -9,7 +9,7 @@ import { eq } from 'drizzle-orm';
 import Link from 'next/link';
 
 
-function CourseCard({course,refreshData,displayUser=false}) {
+function CourseCard({course, refreshData=()=>{}, displayUser=false}) {
 
     const handleOnDelete=async()=>{
         const resp=await db.delete(CourseList)
@@ -26,8 +26,14 @@ function CourseCard({course,refreshData,displayUser=false}) {
     <div className='shadow-sm rounded-lg border p-2
      cursor-pointer mt-4 hover:border-primary'>
         <Link href={'/course/'+course?.courseId}>
-            <Image alt="placeholder"  src={course?.courseBanner} width={300} height={200}
-            className='w-full h-[200px] object-cover rounded-lg'
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt={course?.courseOutput?.course?.name || 'course'}
+              src={course?.courseBanner || '/placeholder.png'}
+              width={300}
+              height={200}
+              className='w-full h-[200px] object-cover rounded-lg'
+              onError={(e) => { e.target.src = '/placeholder.png'; }}
             />
         </Link>
         <div className='p-2'>

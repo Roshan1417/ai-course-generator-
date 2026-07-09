@@ -3,13 +3,12 @@ import Image from 'next/image';
 import React, { useContext } from 'react';
 import { HiHome } from "react-icons/hi2";
 import { MdOutlineExplore } from "react-icons/md";
-import { GrUpgrade } from "react-icons/gr";
 import { TbLogout2 } from "react-icons/tb";
+import { HiOutlineCog6Tooth } from "react-icons/hi2";
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Progress } from "@/components/ui/progress";
 import { UserCourseListContext } from '@/app/_context/UserCourseListContext';
-import { BsFillSuitcaseLgFill } from "react-icons/bs";
 
 const SideBar = () => {
   const { userCourseList } = useContext(UserCourseListContext);
@@ -29,18 +28,12 @@ const SideBar = () => {
     },
     {
       id: 3,
-      name: 'Upgrade',
-      icon: <GrUpgrade />,
-      path: '/dashboard/upgrade',
+      name: 'Settings',
+      icon: <HiOutlineCog6Tooth />,
+      path: '/dashboard/settings',
     },
     {
       id: 4,
-      name: 'Jobs',
-      icon: <BsFillSuitcaseLgFill />      ,
-      path: '/dashboard/jobs',
-    },
-    {
-      id: 5,
       name: 'Logout',
       icon: <TbLogout2 />,
       path: '/dashboard/logout',
@@ -51,7 +44,7 @@ const SideBar = () => {
 
   return (
     <div className="fixed h-full md:w-64 p-5 shadow-md">
-      <Image alt="placeholder"  src={'/logo.svg'} width={160} height={100} />
+      <Image alt="logo" src={'/logo.svg'} width={160} height={100} />
       <hr className="my-5" />
       <ul>
         {Menu.map((item) => (
@@ -70,11 +63,8 @@ const SideBar = () => {
         ))}
       </ul>
       <div className="absolute bottom-10 w-[80%]">
-        <Progress value={(userCourseList?.length / 5) * 100} />
-        <h2 className="text-sm my-2">{userCourseList?.length} out of 5 created</h2>
-        <h2 className="text-xs text-gray-500">
-          Upgrade your plan for unlimited course generation
-        </h2>
+        <Progress value={(userCourseList?.length / 10) * 100} />
+        <h2 className="text-sm my-2">{userCourseList?.length} out of 10 created</h2>
       </div>
     </div>
   );

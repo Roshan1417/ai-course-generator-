@@ -48,7 +48,7 @@ const SelectOption = () => {
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Yes">1 Hours</SelectItem>
+              <SelectItem value="1 Hours">1 Hours</SelectItem>
               <SelectItem value="2 Hours">2 Hours</SelectItem>
               <SelectItem value="More than 3 Hours">
                 More than 3 Hours
@@ -69,7 +69,7 @@ const SelectOption = () => {
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="1 Hours">Yes</SelectItem>
+              <SelectItem value="Yes">Yes</SelectItem>
               <SelectItem value="No">No</SelectItem>
             </SelectContent>
           </Select>

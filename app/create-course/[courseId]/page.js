@@ -8,23 +8,24 @@ import CourseBasicInfo from './_components/CourseBasicInfo'
 import CourseDetails from './_components/CourseDetails'
 import ChapterList from './_components/ChapterList'
 import { Button } from '@/components/ui/button'
-import { GenerateChapterContent_AI } from '@/configs/AiModel'
+
 import LoadingDialog from '../_components/LoadingDialog'
 import service from '@/configs/service'
 import { useRouter } from 'next/navigation'
 
 function CourseLayout({ params }) {
+  const { courseId } = React.use(params);
   const { user } = useUser();
   const [course,setCourse]=useState([]);
   const [loading,setLoading]=useState(false);
   const router=useRouter();
   useEffect(() => {
-    params && GetCourse();
-  }, [params,user])
+    courseId && GetCourse();
+  }, [courseId,user])
 
   const GetCourse = async () => {
     const result = await db.select().from(CourseList)
-      .where(and(eq(CourseList.courseId, params?.courseId),
+      .where(and(eq(CourseList.courseId, courseId),
         eq(CourseList?.createdBy, user?.primaryEmailAddress?.emailAddress)))
     
         setCourse(result[0]);
@@ -49,10 +50,15 @@ function CourseLayout({ params }) {
               videoId=resp[0]?.id?.videoId;
               console.log(resp);
             })
-            //generate chapter content
-              const result=await GenerateChapterContent_AI.sendMessage(PROMPT);
-              // console.log(result?.response?.text());
-              const content=JSON.parse(result?.response?.text())
+            //generate chapter content via server API
+              const aiResp = await fetch('/api/generate-course', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: PROMPT, type: 'chapter-content' })
+              });
+              const aiData = await aiResp.json();
+              if (!aiResp.ok) throw new Error(aiData.error);
+              const content = aiData.result
               
               // Save Chapter Content + Video URL
              const resp= await db.insert(Chapters).values({
@@ -74,7 +80,7 @@ function CourseLayout({ params }) {
 
          if(index==chapters?.length-1) 
          {
-          router.replace('/create-course/'+course?.courseId+"/finish")
+          router.replace('/course/'+course?.courseId+"/start")
          }
       //  }
 
